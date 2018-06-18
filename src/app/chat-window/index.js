@@ -13,7 +13,7 @@ import {
 } from "reactstrap";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { Map, remove } from "immutable";
-import { map, filter } from "lodash";
+import { map, filter, find } from "lodash";
 import { paperPlane } from "react-icons-kit/fa/paperPlane";
 import { lightbulbO } from "react-icons-kit/fa/lightbulbO";
 import { checkCircle } from "react-icons-kit/fa/checkCircle";
@@ -21,7 +21,10 @@ import { checkCircleO } from "react-icons-kit/fa/checkCircleO";
 import { envelopeSquare } from "react-icons-kit/fa/envelopeSquare";
 import { comment } from "react-icons-kit/fa/comment";
 import { close } from "react-icons-kit/fa/close";
+import { graduationCap } from "react-icons-kit/fa/graduationCap";
+import { male } from "react-icons-kit/fa/male";
 import {
+  Alert,
   TabContent,
   TabPane,
   Nav,
@@ -34,10 +37,21 @@ import {
   Row,
   Col
 } from "reactstrap";
+import { userO } from "react-icons-kit/fa/userO";
 import ScrollArea from "react-scrollbar";
 import { ban } from "react-icons-kit/fa/ban";
 import "../style/hover.css";
 import classnames from "classnames";
+import {
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem
+} from "reactstrap";
+import AlarmImg from "../imgs/alarm.gif";
+
+const getTheMostRatedQuestion = questions =>
+  find(questions, question => question[1] >= 10);
 
 const withState = provideState({
   initialState: () => ({
@@ -45,7 +59,9 @@ const withState = provideState({
     questionsLikes: new Map(),
     question: "",
     messageModal: false,
-    activeTab: "1"
+    activeTab: "1",
+    remainingQuestion: 5,
+    dropdownOpen: false
   }),
   effects: {
     handleQuestionChange: (_, { target: { value } }) => state => ({
@@ -69,7 +85,8 @@ const withState = provideState({
           state.question !== ""
             ? [...state.preQuestions, state.question]
             : state.preQuestions,
-        question: ""
+        question: "",
+        remainingQuestion: state.remainingQuestion - 1
       };
     },
     handleLike: (_, question) => state => ({
@@ -96,6 +113,10 @@ const withState = provideState({
     toggle: (_, tab) => state => ({
       ...state,
       activeTab: tab
+    }),
+    toggleDropDown: () => state => ({
+      ...state,
+      dropdownOpen: !state.dropdownOpen
     })
   },
   computed: {
@@ -119,39 +140,66 @@ const App = ({ state, effects }) => (
     <Row>
       <Col>
         <h2>
-          <span className="text-muted">Cours:</span> Cycle de vie d'un logiciel
+          <span className="text-muted">Cours</span> Cycle de vie d'un logiciel
+          <span className="float-right">
+            <Badge color="info">CHAPTER 1</Badge>
+          </span>
         </h2>
       </Col>
     </Row>
     <Nav tabs>
-      <NavItem>
+      <NavItem
+        style={{
+          cursor: "pointer",
+          width: "33%",
+          background: state.activeTab === "1" ? "gray" : "white",
+          color: state.activeTab === "1" ? "white" : "black"
+        }}
+      >
         <NavLink
           className={classnames({ active: state.activeTab === "1" })}
           onClick={() => {
             effects.toggle("1");
           }}
+          className="text-center"
         >
-          Student
+          <Icon icon={graduationCap} /> &nbsp;Student
         </NavLink>
       </NavItem>
-      <NavItem>
+      <NavItem
+        style={{
+          cursor: "pointer",
+          width: "33%",
+          background: state.activeTab === "2" ? "gray" : "white",
+          color: state.activeTab === "2" ? "white" : "black"
+        }}
+      >
         <NavLink
           className={classnames({ active: state.activeTab === "2" })}
           onClick={() => {
             effects.toggle("2");
           }}
+          className="text-center"
         >
-          Controller
+          <Icon icon={userO} /> &nbsp;Controller
         </NavLink>
       </NavItem>
-      <NavItem>
+      <NavItem
+        style={{
+          cursor: "pointer",
+          width: "33%",
+          background: state.activeTab === "3" ? "gray" : "white",
+          color: state.activeTab === "3" ? "white" : "black"
+        }}
+      >
         <NavLink
           className={classnames({ active: state.activeTab === "3" })}
           onClick={() => {
             effects.toggle("3");
           }}
+          className="text-center"
         >
-          Teacher
+          <Icon icon={male} />&nbsp;Teacher
         </NavLink>
       </NavItem>
     </Nav>
@@ -292,6 +340,10 @@ const App = ({ state, effects }) => (
                       </InputGroupAddon>
                     </InputGroup>
                   </Form>
+                  <span className="float-right">
+                    Remaining questions{" "}
+                    <Badge color="danger">{state.remainingQuestion}</Badge>
+                  </span>
                   <br />
                 </Col>
               </Row>
@@ -318,6 +370,9 @@ const App = ({ state, effects }) => (
       <TabPane tabId="2">
         <Row>
           <Col>
+            <br />
+            <h4>Waiting for approvment questions</h4>
+            <hr />
             <ListGroup>
               {map(state.preQuestions, question => (
                 <ListGroupItem className="hvr-bob" key={`${question}`}>
@@ -353,6 +408,21 @@ const App = ({ state, effects }) => (
       <TabPane tabId="3">
         <Row>
           <Col>
+            <br />
+            <Dropdown
+              isOpen={state.dropdownOpen}
+              toggle={effects.toggleDropDown}
+              className="float-right"
+            >
+              <DropdownToggle caret>Chapter 1</DropdownToggle>
+              <DropdownMenu>
+                <DropdownItem>Chapter 2</DropdownItem>
+                <DropdownItem>Chapter 3</DropdownItem>
+                <DropdownItem>Chapter 4</DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+            <br />
+            <br />
             <Card body>
               <CardTitle>
                 <Icon
@@ -368,13 +438,38 @@ const App = ({ state, effects }) => (
                     Object.entries(state.sortedQuestions.toJS()),
                     question => (
                       <ListGroupItem className="hvr-bob" key={`${question}`}>
-                        {question[0]}
+                        {question[0]}{" "}
+                        <Badge color="success" className="float-right">
+                          {question[1]}
+                        </Badge>
                       </ListGroupItem>
                     )
                   ).slice(0, 3)}
                 </ListGroup>
               </CardText>
             </Card>
+          </Col>
+        </Row>
+        <br />
+        <br />
+        <Row>
+          <Col>
+            {getTheMostRatedQuestion(
+              Object.entries(state.sortedQuestions.toJS())
+            ) && (
+              <div className="text-center">
+                <img src={AlarmImg} alt="img" />
+                <Alert color="warning">
+                  <h2>
+                    {
+                      getTheMostRatedQuestion(
+                        Object.entries(state.sortedQuestions.toJS())
+                      )[0]
+                    }
+                  </h2>
+                </Alert>
+              </div>
+            )}
           </Col>
         </Row>
       </TabPane>

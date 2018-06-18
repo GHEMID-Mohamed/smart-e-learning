@@ -1,19 +1,18 @@
-import React from "react"
-import { provideState, injectState } from "freactal"
+import React from "react";
+import { provideState, injectState } from "freactal";
 import {
   HashRouter as Router,
   NavLink,
   Redirect,
   Route,
   Switch
-} from "react-router-dom"
-import { Container, Nav, Navbar, NavbarBrand, NavItem } from "reactstrap"
-import { Helmet } from "react-helmet"
+} from "react-router-dom";
+import { Container, Nav, Navbar, NavbarBrand, NavItem } from "reactstrap";
+import { Helmet } from "react-helmet";
+import ChatWindow from "./chat-window";
 
-import asyncComponent from "../libs/async-component"
-import Modal from './components/modal'
-
-const AsyncContactUs = asyncComponent(() => import("./contact-us"))
+import asyncComponent from "../libs/async-component";
+import Modal from "./components/modal";
 
 const withState = provideState({
   initialState: () => ({
@@ -39,9 +38,9 @@ const withState = provideState({
       dismiss,
       time
     ) => state => {
-      effects.updateNotificationMessage(notificationMessage, notificationColor)
-      if (dismiss) setTimeout(() => effects.clearNotificationMessage(), time)
-      window.scrollTo(0, 0)
+      effects.updateNotificationMessage(notificationMessage, notificationColor);
+      if (dismiss) setTimeout(() => effects.clearNotificationMessage(), time);
+      window.scrollTo(0, 0);
     },
     updateNotificationMessage: (
       _,
@@ -49,7 +48,7 @@ const withState = provideState({
       notificationColor
     ) => state => ({ ...state, notificationMessage, notificationColor })
   }
-})
+});
 
 const App = ({ state, effects }) => (
   <Container>
@@ -59,7 +58,7 @@ const App = ({ state, effects }) => (
     <Router>
       <div>
         <Navbar color="faded" light expand="md">
-          <NavbarBrand href="#">Bloodz</NavbarBrand>
+          <NavbarBrand href="#">SMART E-Learning </NavbarBrand>
           <Nav className="ml-auto" navbar>
             <NavItem>
               <NavLink className="nav-link" to="/contact-us">
@@ -68,20 +67,10 @@ const App = ({ state, effects }) => (
             </NavItem>
           </Nav>
         </Navbar>
-
-        <Switch>
-          <Route path="/contact-us" component={AsyncContactUs} />
-        </Switch>
       </div>
     </Router>
-    <Modal
-      action={state.modalAction}
-      args={state.modalActionArgs}
-      close={effects.closeModal}
-      message="Are you sure you want to continue ?"
-      modalState={state.modal}
-    />
+    <ChatWindow />
   </Container>
-)
+);
 
-export default withState(injectState(App))
+export default withState(injectState(App));

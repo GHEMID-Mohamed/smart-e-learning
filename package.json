@@ -5,12 +5,16 @@
   "dependencies": {
     "bootstrap": "4.0.0",
     "freactal": "julien-f/freactal#pkg",
+    "immutable": "^3.8.2",
+    "lodash": "^4.17.10",
     "prettier": "^1.10.2",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-helmet": "^5.2.0",
+    "react-icons-kit": "^1.1.5",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.0",
+    "react-scrollbar": "^0.5.4",
     "reactstrap": "^5.0.0-beta"
   },
   "scripts": {

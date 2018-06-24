@@ -53,7 +53,7 @@ const withState = provideState({
 const App = ({ state, effects }) => (
   <Container>
     <Helmet>
-      <title>Admin</title>
+      <title>Smart E-Learning</title>
     </Helmet>
     <Router>
       <div>

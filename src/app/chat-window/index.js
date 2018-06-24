@@ -13,7 +13,7 @@ import {
 } from "reactstrap";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { Map, remove } from "immutable";
-import { map, filter, find } from "lodash";
+import { map, filter, find, forEach } from "lodash";
 import { paperPlane } from "react-icons-kit/fa/paperPlane";
 import { lightbulbO } from "react-icons-kit/fa/lightbulbO";
 import { checkCircle } from "react-icons-kit/fa/checkCircle";
@@ -49,6 +49,19 @@ import {
   DropdownItem
 } from "reactstrap";
 import AlarmImg from "../imgs/alarm.gif";
+import CommentsImg from "../imgs/comments.png";
+import AddComment from "../imgs/addComment.png";
+
+const readyQuestions = [
+  "J'ai pas compris la dernière phase du cycle en V",
+  "Quelle est la différence entre le cycle en spirale et le cycle en cascade ?",
+  "Comment peut on choisir le cycle de vie de logiciel qui convient au projet auquel nous travaillons ?",
+  "Pourquoi les cycle en agile ne colle pas avec les logiciels critiques ?",
+  "Peut on adopter le cycle en spirale à un projet de développement d'un site web ? ",
+  "Pourquoi les entreprises travaillent majoritairement avec le cycle en V ?",
+  "Quelles sont les inconvénients des méthodes agiles ?",
+  "&kljdfjàçsdfklj ?"
+];
 
 const getTheMostRatedQuestion = questions =>
   find(questions, question => question[1] >= 10);
@@ -59,11 +72,24 @@ const withState = provideState({
     questionsLikes: new Map(),
     question: "",
     messageModal: false,
+    commentModal: false,
     activeTab: "1",
     remainingQuestion: 5,
     dropdownOpen: false
   }),
   effects: {
+    initialize: effects => {
+      forEach(["1", "2", "3", "4"], (value, index) => {
+        setTimeout(() => {
+          effects.setQuestion(readyQuestions.pop());
+          effects.addPreQuestion();
+        }, (index + 1) * 7000);
+      });
+    },
+    setQuestion: (_, question) => state => ({
+      ...state,
+      question
+    }),
     handleQuestionChange: (_, { target: { value } }) => state => ({
       ...state,
       question: value
@@ -96,6 +122,10 @@ const withState = provideState({
         state.questionsLikes.get(question) + 1
       )
     }),
+    genereateQuestion: () => state => ({
+      ...state,
+      question: readyQuestions.pop()
+    }),
     removePreQuestion: (_, question) => state => ({
       ...state,
       preQuestions: filter(state.preQuestions, quest => quest !== question)
@@ -109,6 +139,10 @@ const withState = provideState({
     toggleMessage: () => state => ({
       ...state,
       messageModal: !state.messageModal
+    }),
+    togglecomment: () => state => ({
+      ...state,
+      commentModal: !state.commentModal
     }),
     toggle: (_, tab) => state => ({
       ...state,
@@ -152,7 +186,7 @@ const App = ({ state, effects }) => (
         style={{
           cursor: "pointer",
           width: "33%",
-          background: state.activeTab === "1" ? "gray" : "white",
+          background: state.activeTab === "1" ? "#49a2b8" : "white",
           color: state.activeTab === "1" ? "white" : "black"
         }}
       >
@@ -170,7 +204,7 @@ const App = ({ state, effects }) => (
         style={{
           cursor: "pointer",
           width: "33%",
-          background: state.activeTab === "2" ? "gray" : "white",
+          background: state.activeTab === "2" ? "#49a2b8" : "white",
           color: state.activeTab === "2" ? "white" : "black"
         }}
       >
@@ -188,7 +222,7 @@ const App = ({ state, effects }) => (
         style={{
           cursor: "pointer",
           width: "33%",
-          background: state.activeTab === "3" ? "gray" : "white",
+          background: state.activeTab === "3" ? "#49a2b8" : "white",
           color: state.activeTab === "3" ? "white" : "black"
         }}
       >
@@ -207,7 +241,7 @@ const App = ({ state, effects }) => (
       <TabPane tabId="1">
         <div>
           <Row>
-            <Col md="7">
+            <Col>
               <br />
               <Card body>
                 <CardTitle>
@@ -275,7 +309,7 @@ const App = ({ state, effects }) => (
                                 color: "green",
                                 marginRight: "10px"
                               }}
-                              onClick={effects.toggleMessage}
+                              onClick={effects.togglecomment}
                             />
                           </span>
                         </ListGroupItem>
@@ -285,7 +319,6 @@ const App = ({ state, effects }) => (
                 </CardText>
               </Card>
             </Col>
-            <Col />
           </Row>
           <Row
             className="fixed-bottom"
@@ -344,15 +377,20 @@ const App = ({ state, effects }) => (
                     Remaining questions{" "}
                     <Badge color="danger">{state.remainingQuestion}</Badge>
                   </span>
+                  <span
+                    className="float-left"
+                    style={{ cursor: "pointer", textDecoration: "underline" }}
+                    onClick={effects.genereateQuestion}
+                  >
+                    Generate question
+                  </span>
                   <br />
                 </Col>
               </Row>
             </Col>
           </Row>
           <Modal isOpen={state.messageModal} toggle={effects.toggleMessage}>
-            <ModalHeader toggle={this.toggle}>
-              Send a private response
-            </ModalHeader>
+            <ModalHeader>Send a private response</ModalHeader>
             <ModalBody>
               <Input type="textarea" />
             </ModalBody>
@@ -364,6 +402,15 @@ const App = ({ state, effects }) => (
                 Cancel
               </Button>
             </ModalFooter>
+          </Modal>
+          <Modal isOpen={state.commentModal} toggle={effects.togglecomment} size="lg">
+            <ModalHeader>Comments</ModalHeader>
+            <ModalBody>
+              <div>
+                <img src={CommentsImg} alt="comments" />
+                <img src={AddComment} alt="comments" className="float-right"/>
+              </div>
+            </ModalBody>
           </Modal>
         </div>
       </TabPane>
